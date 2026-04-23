@@ -55,26 +55,23 @@ create table sys_login_info
 create sequence if not exists sys_menu_seq start with 63 increment by 1;
 create table sys_menu
 (
-    menu_id      bigint default next value for sys_menu_seq,
-    menu_name    varchar(64)              not null comment '菜单名称',
-    parent_id    bigint       default 0   not null comment '父菜单ID',
-    order_num    int          default 0   not null comment '显示顺序',
-    path         varchar(255) default ''  null comment '路由地址',
-    component    varchar(255)             null comment '组件路径',
-    query        varchar(255)             null comment '路由参数',
-    is_external  tinyint   default 1   not null comment '是否为外链（1是 0否）',
-    is_cache     tinyint   default 0   not null comment '是否缓存（1缓存 0不缓存）',
-    menu_type    smallint     default 0   not null comment '菜单类型（M=1目录 C=2菜单 F=3按钮）',
-    is_visible   tinyint   default 0   not null comment '菜单状态（1显示 0隐藏）',
-    status       smallint     default 0   not null comment '菜单状态（0正常 1停用）',
-    perms        varchar(128)             null comment '权限标识',
-    icon         varchar(128) default '#' null comment '菜单图标',
-    creator_id   bigint                   null comment '创建者ID',
-    create_time  datetime                 null comment '创建时间',
-    updater_id   bigint                   null comment '更新者ID',
-    update_time  datetime                 null comment '更新时间',
-    remark       varchar(512) default ''  null comment '备注',
-    deleted      tinyint   default 0   not null comment '逻辑删除'
+    menu_id     bigint auto_increment comment '菜单ID'
+        primary key,
+    menu_name   varchar(64)                not null comment '菜单名称',
+    menu_type   smallint      default 0    not null comment '菜单的类型(1为普通菜单2为目录3为内嵌iFrame4为外链跳转)',
+    router_name varchar(255)  default ''   not null comment '路由名称（需保持和前端对应的vue文件中的name保持一致defineOptions方法中设置的name）',
+    parent_id   bigint        default 0    not null comment '父菜单ID',
+    path        varchar(255)               null comment '组件路径（对应前端项目view文件夹中的路径）',
+    is_button   tinyint(1)    default 0    not null comment '是否按钮',
+    permission  varchar(128)               null comment '权限标识',
+    meta_info   varchar(1024) default '{}' not null comment '路由元信息（前端根据这个信息进行逻辑处理）',
+    status      smallint      default 0    not null comment '菜单状态（1启用 0停用）',
+    remark      varchar(256)  default ''   null comment '备注',
+    creator_id  bigint                     null comment '创建者ID',
+    create_time datetime                   null comment '创建时间',
+    updater_id  bigint                     null comment '更新者ID',
+    update_time datetime                   null comment '更新时间',
+    deleted     tinyint(1)    default 0    not null comment '逻辑删除'
 );
 
 create sequence if not exists sys_notice_seq start with 3 increment by 1;
@@ -165,7 +162,7 @@ create table sys_user
     role_id      bigint                  null comment '角色id',
     dept_id      bigint                  null comment '部门ID',
     username     varchar(64)             not null comment '用户账号',
-    nick_name    varchar(32)             not null comment '用户昵称',
+    nickname    varchar(32)             not null comment '用户昵称',
     user_type    smallint     default 0  null comment '用户类型（00系统用户）',
     email        varchar(128) default '' null comment '用户邮箱',
     phone_number varchar(18)  default '' null comment '手机号码',
