@@ -1,0 +1,76 @@
+server:
+  port: 18012
+  servlet:
+    context-path: /
+  tomcat:
+    uri-encoding: UTF-8
+    accept-count: 1000
+    threads:
+      max: 800
+      min-spare: 100
+
+spring:
+  config:
+    import: optional:classpath:application-basic-dev.yml
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driverClassName: org.postgresql.Driver
+    druid:
+      webStatFilter:
+        enabled: true
+      statViewServlet:
+        enabled: true
+        allow:
+        url-pattern: /druid/*
+        login-username: healthtrail
+        login-password: 123456
+      filter:
+        stat:
+          enabled: true
+          log-slow-sql: true
+          slow-sql-millis: 1000
+          merge-sql: true
+        wall:
+          config:
+            multi-statement-allow: true
+    dynamic:
+      primary: master
+      strict: false
+      druid:
+        initialSize: 5
+        minIdle: 10
+        maxActive: 20
+        maxWait: 60000
+        timeBetweenEvictionRunsMillis: 60000
+        minEvictableIdleTimeMillis: 300000
+        maxEvictableIdleTimeMillis: 900000
+        validationQuery: SELECT 1
+        testWhileIdle: true
+        testOnBorrow: false
+        testOnReturn: false
+      datasource:
+        master:
+          url: jdbc:postgresql://192.168.193.27:5432/healthtrail
+          username: admin_user
+          password: 2bJKlM4bFBIHC3
+  redis:
+    host: 192.168.193.27
+    port: 6379
+    database: 2
+    password:
+    timeout: 10s
+    lettuce:
+      pool:
+        min-idle: 0
+        max-idle: 8
+        max-active: 8
+        max-wait: -1ms
+
+logging:
+  file:
+    path: D:/logs/healthtrail-api-dev
+
+healthtrail:
+  file-base-dir: D:\healthtrail
+  api-prefix: /dev-api
+  demo-enabled: false

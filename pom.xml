@@ -4,20 +4,26 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.agileboot</groupId>
-    <artifactId>agileboot</artifactId>
+    <groupId>com.healthtrail</groupId>
+    <artifactId>healthtrail</artifactId>
     <!--  放弃使用 revision字段 子module会安装失败-->
     <!--  https://stackoverflow.com/questions/52173260/how-to-resolve-parent-pom-dependency-issue-failed-to-read-artifact-descriptor -->
     <version>1.0.0</version>
 
-    <name>agileboot</name>
-    <url>http://www.agileboot.vip</url>
-    <description>基于 springboot的快速开发系统</description>
+    <name>HealthTrail</name>
+    <url>https://healthtrail.local</url>
+    <description>HealthTrail 后端服务</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <java.version>1.8</java.version>
+        <!--
+            统一将项目编译运行版本提升到 Java 17。
+            本次健康业务代码已经引入 Objects.requireNonNullElse 等 Java 9+ 标准库能力，
+            如果继续维持 1.8，开发人员会在编译期持续遇到“找不到符号”的错误。
+            这里直接把父 POM 的统一版本抬升到 17，确保所有子模块使用同一套语言级别和 JDK API。
+        -->
+        <java.version>17</java.version>
         <maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
         <druid.version>1.2.8</druid.version>
         <bitwalker.version>1.21</bitwalker.version>
@@ -29,11 +35,18 @@
         <commons.io.version>2.11.0</commons.io.version>
         <commons.fileupload.version>1.4</commons.fileupload.version>
         <commons.collections.version>3.2.2</commons.collections.version>
+        <minio.version>8.5.17</minio.version>
         <poi.version>4.1.2</poi.version>
+        <pdfbox.version>2.0.30</pdfbox.version>
         <velocity.version>2.3</velocity.version>
         <jwt.version>0.9.1</jwt.version>
         <hutool.version>5.7.22</hutool.version>
-        <lombok.version>1.18.30</lombok.version>
+        <!--
+            Lombok 仅做编译期代码生成，升级到当前稳定小版本的风险较低。
+            这里先收敛到 1.18.46，主要目的是获得对更新 JDK / IDE 的更好兼容性，
+            同时不牵涉业务运行时行为变化。
+        -->
+        <lombok.version>1.18.46</lombok.version>
         <mybatis-plus.version>3.5.2</mybatis-plus.version>
         <mybatis-plus-generator.version>3.5.1</mybatis-plus-generator.version>
         <it.ozimov.version>0.7.3</it.ozimov.version>
@@ -41,12 +54,30 @@
         <org.lionsoul.version>2.6.5</org.lionsoul.version>
         <com.google.guava.version>31.0.1-jre</com.google.guava.version>
         <springdoc-openapi-ui.version>1.6.14</springdoc-openapi-ui.version>
-        <mysql-connector-java>8.0.31</mysql-connector-java>
+        <!--
+            PostgreSQL 驱动先只做同大版本小升级。
+            这样可以优先吸收驱动层修复，而不把后端一次性带进 Spring Boot 大版本升级。
+        -->
+        <postgresql.version>42.7.11</postgresql.version>
         <spring.boot.version>2.7.10</spring.boot.version>
-        <maven.compiler.plugin.version>3.1</maven.compiler.plugin.version>
+        <!--
+            maven-compiler-plugin 3.1 对 Java 17 的支持不完整，
+            升级到 3.11.0 后可以稳定识别 release 17，减少不同开发机上的构建差异。
+        -->
+        <maven.compiler.plugin.version>3.11.0</maven.compiler.plugin.version>
         <!-- 升级版本以支持junit5 -->
         <maven.surefire.plugin.version>3.0.0-M7</maven.surefire.plugin.version>
         <maven.war.plugin.version>3.1.0</maven.war.plugin.version>
+        <!--
+            当前仓库历史上为了提升日常打包速度，父 POM 直接把 surefire 的 skipTests 写死成了 true。
+            这种写法的问题是：即使开发人员在命令行显式传入 `-DskipTests=false`，
+            Maven 也无法覆盖掉插件里的硬编码，结果就是“看起来执行了 test，其实始终没跑”。
+            这里改成同名属性的默认值方案：
+            1. 默认仍然保持 `true`，不改变团队现有的日常构建习惯；
+            2. 需要跑测试时，直接使用标准 Maven 参数 `-DskipTests=false` 即可生效；
+            3. 不需要引入新的私有参数，减少后续开发人员记忆成本。
+         -->
+        <skipTests>true</skipTests>
         <!-- JUnit Jupiter 版本 -->
         <junit.jupiter.version>5.9.2</junit.jupiter.version>
         <!-- Mockito 版本（或直接用 mockito-inline）-->
@@ -136,6 +167,13 @@
                 <version>${poi.version}</version>
             </dependency>
 
+            <!-- PDF 文本解析：用于检查报告后台解析服务读取文本型 PDF。 -->
+            <dependency>
+                <groupId>org.apache.pdfbox</groupId>
+                <artifactId>pdfbox</artifactId>
+                <version>${pdfbox.version}</version>
+            </dependency>
+
             <!-- velocity代码生成使用模板 -->
             <dependency>
                 <groupId>org.apache.velocity</groupId>
@@ -143,11 +181,11 @@
                 <version>${velocity.version}</version>
             </dependency>
 
-            <!-- Mysql驱动包 -->
+            <!-- PostgreSQL驱动包 -->
             <dependency>
-                <groupId>mysql</groupId>
-                <artifactId>mysql-connector-java</artifactId>
-                <version>${mysql-connector-java}</version>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${postgresql.version}</version>
             </dependency>
 
             <!-- collections工具类 -->
@@ -155,6 +193,13 @@
                 <groupId>commons-collections</groupId>
                 <artifactId>commons-collections</artifactId>
                 <version>${commons.collections.version}</version>
+            </dependency>
+
+            <!-- MinIO / S3 兼容对象存储 -->
+            <dependency>
+                <groupId>io.minio</groupId>
+                <artifactId>minio</artifactId>
+                <version>${minio.version}</version>
             </dependency>
 
             <!-- Token生成与解析-->
@@ -174,36 +219,36 @@
 
             <!-- admin管理模块 -->
             <dependency>
-                <groupId>com.agileboot</groupId>
-                <artifactId>agileboot-admin</artifactId>
+                <groupId>com.healthtrail</groupId>
+                <artifactId>healthtrail-admin</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <!-- app预留接口-->
             <dependency>
-                <groupId>com.agileboot</groupId>
-                <artifactId>agileboot-api</artifactId>
+                <groupId>com.healthtrail</groupId>
+                <artifactId>healthtrail-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <!-- 核心业务领域-->
             <dependency>
-                <groupId>com.agileboot</groupId>
-                <artifactId>agileboot-domain</artifactId>
+                <groupId>com.healthtrail</groupId>
+                <artifactId>healthtrail-domain</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <!-- 核心模块-->
             <dependency>
-                <groupId>com.agileboot</groupId>
-                <artifactId>agileboot-infrastructure</artifactId>
+                <groupId>com.healthtrail</groupId>
+                <artifactId>healthtrail-infrastructure</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <!-- 通用工具-->
             <dependency>
-                <groupId>com.agileboot</groupId>
-                <artifactId>agileboot-common</artifactId>
+                <groupId>com.healthtrail</groupId>
+                <artifactId>healthtrail-common</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -296,11 +341,11 @@
     </dependencyManagement>
 
     <modules>
-        <module>agileboot-admin</module>
-        <module>agileboot-api</module>
-        <module>agileboot-common</module>
-        <module>agileboot-domain</module>
-        <module>agileboot-infrastructure</module>
+        <module>healthtrail-admin</module>
+        <module>healthtrail-api</module>
+        <module>healthtrail-common</module>
+        <module>healthtrail-domain</module>
+        <module>healthtrail-infrastructure</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -340,8 +385,12 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven.compiler.plugin.version}</version>
                     <configuration>
-                        <source>${java.version}</source>
-                        <target>${java.version}</target>
+                        <!--
+                            使用 release 而不是单独的 source/target，
+                            让编译器在“语法级别、字节码级别、JDK 标准库可见性”三个维度保持一致，
+                            避免只改 source/target 后仍意外引用到不匹配的 JDK API。
+                        -->
+                        <release>${java.version}</release>
                         <encoding>${project.build.sourceEncoding}</encoding>
                     </configuration>
                 </plugin>
@@ -349,9 +398,13 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven.surefire.plugin.version}</version>
-                    <!-- 想跑test的话  设置成false  -->
+                    <!--
+                        这里不再把跳过测试硬编码成 true，而是改为读取 `${skipTests}`。
+                        这样父 POM 仍然可以默认跳过测试，但命令行上的 `-DskipTests=false`
+                        能真正透传到 surefire，方便按模块、按测试类做精准验证。
+                     -->
                     <configuration>
-                        <skipTests>true</skipTests>
+                        <skipTests>${skipTests}</skipTests>
                     </configuration>
                 </plugin>
                 <plugin>

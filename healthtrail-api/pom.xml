@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>healthtrail</artifactId>
+        <groupId>com.healthtrail</groupId>
+        <version>1.0.0</version>
+    </parent>
+    <packaging>jar</packaging>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>healthtrail-api</artifactId>
+
+    <description>
+        外部API
+    </description>
+
+    <dependencies>
+
+        <!-- 核心模块-->
+        <dependency>
+            <groupId>com.healthtrail</groupId>
+            <artifactId>healthtrail-infrastructure</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!--使用undertow依赖-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-undertow</artifactId>
+        </dependency>
+
+        <!-- 业务领域 -->
+        <dependency>
+            <groupId>com.healthtrail</groupId>
+            <artifactId>healthtrail-domain</artifactId>
+        </dependency>
+
+        <!--
+            API 模块补充独立的 Spring Boot 测试依赖。
+            这次 `basic,test` 内存模式问题暴露出：只有 admin 侧有 H2 启动回归测试，
+            api 作为独立启动入口却没有对应的 smoke test，导致 profile 资源漏配后只能在手工启动时发现。
+            加上这组依赖后，可以直接在 api 模块里落一条专门验证 H2 内存模式的回归测试。
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.junit.vintage</groupId>
+                    <artifactId>junit-vintage-engine</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!--
+                API 模块是 App 端后端服务的独立启动入口，部署时需要像 admin 一样生成
+                Spring Boot 可执行 fat jar。没有 repackage 时，Maven 只会产出普通模块 jar，
+                服务器执行 `java -jar healthtrail-api-1.0.0.jar` 就会报
+                "no main manifest attribute"。
+            -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!--
+                API 模块显式覆盖 surefire 的默认跳过策略。
+                父 POM 当前把测试阶段默认设成 skipTests=true，这会导致我们刚补上的
+                `ApiTestProfileH2InitializationTest` 即使存在，也只会被编译、不会被执行。
+                这里和 admin 模块保持一致，确保 API 作为独立启动入口时也拥有真实生效的回归测试保护。
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven.surefire.plugin.version}</version>
+                <configuration>
+                    <skipTests>false</skipTests>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

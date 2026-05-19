@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-labelledby="title desc">
+  <title>Default drug image</title>
+  <desc>Default placeholder used when no drug photo is uploaded.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f4efe7"/>
+      <stop offset="100%" stop-color="#e5ddd0"/>
+    </linearGradient>
+    <linearGradient id="bottle" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#f6f1e8"/>
+    </linearGradient>
+  </defs>
+  <rect width="160" height="160" rx="28" fill="url(#bg)"/>
+  <circle cx="118" cy="40" r="18" fill="#d6cab8" opacity="0.45"/>
+  <circle cx="42" cy="122" r="14" fill="#c9b79d" opacity="0.35"/>
+  <rect x="54" y="30" width="52" height="20" rx="8" fill="#7b8d73"/>
+  <rect x="44" y="46" width="72" height="78" rx="16" fill="url(#bottle)" stroke="#b9ab96" stroke-width="4"/>
+  <rect x="55" y="66" width="50" height="28" rx="10" fill="#d8e4d1"/>
+  <path d="M64 80c6-10 18-10 24 0" fill="none" stroke="#6f8b65" stroke-width="4" stroke-linecap="round"/>
+  <rect x="41" y="106" width="30" height="18" rx="9" transform="rotate(-18 41 106)" fill="#ffffff" stroke="#bfae97" stroke-width="3"/>
+  <path d="M37 114l26-8" stroke="#d58477" stroke-width="4" stroke-linecap="round"/>
+  <rect x="92" y="112" width="28" height="16" rx="8" transform="rotate(22 92 112)" fill="#f7efe3" stroke="#bfae97" stroke-width="3"/>
+  <path d="M98 111l14 17" stroke="#7da6c7" stroke-width="4" stroke-linecap="round"/>
+</svg>

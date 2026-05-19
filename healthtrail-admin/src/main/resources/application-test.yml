@@ -1,0 +1,78 @@
+server:
+    port: 18021
+    servlet:
+        context-path: /
+    tomcat:
+        uri-encoding: UTF-8
+        accept-count: 1000
+        threads:
+            max: 800
+            min-spare: 100
+
+spring:
+    config:
+        import: optional:classpath:application-basic-test.yml
+    datasource:
+        driver-class-name: org.h2.Driver
+        dynamic:
+            primary: master
+            strict: false
+            druid:
+                validationQuery: SELECT 1
+                testWhileIdle: true
+                testOnBorrow: false
+                testOnReturn: false
+            datasource:
+                master:
+                    # test 模式不能继续共用固定 H2 库名，否则多个 Spring 上下文会命中同一块内存库。
+                    # 旧配置里的 DB_CLOSE_DELAY=-1 会把库生命周期延长到 JVM 结束，第二次初始化时就会重复建表。
+                    # 这里使用 random.uuid 生成上下文级唯一库名，让每次启动都在一套全新的 H2 schema 上执行。
+                    url: jdbc:h2:mem:healthtrail_admin_${random.uuid};DB_CLOSE_DELAY=-1;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE
+                    h2:
+                        console:
+                            enabled: true
+                            settings:
+                                trace: true
+                                web-allow-others: true
+                            path: /h2-console
+
+    sql:
+        init:
+            # 显式开启脚本初始化，避免动态数据源场景下 Spring 对嵌入式数据库的自动判断不稳定。
+            mode: always
+            platform: h2
+            encoding: UTF-8
+            schema-locations:
+                - classpath:h2sql/healthtrail_test_schema.sql
+                - classpath:h2sql/health_test_schema.sql
+            data-locations:
+                - classpath:h2sql/healthtrail_test_data.sql
+                - classpath:h2sql/health_test_data.sql
+
+    redis:
+        host: ${TODOTRAIL_REDIS_HOST:192.168.193.27}
+        port: ${TODOTRAIL_REDIS_PORT:6379}
+        database: ${TODOTRAIL_REDIS_DATABASE:4}
+        timeout: 10s
+        lettuce:
+            pool:
+                min-idle: 0
+                max-idle: 8
+                max-active: 8
+                max-wait: -1ms
+
+logging:
+    file:
+        path: D:/logs/healthtrail-test
+
+springdoc:
+    swagger-ui:
+        enabled: true
+        url: ${healthtrail.api-prefix}/v3/api-docs
+        config-url: ${healthtrail.api-prefix}/v3/api-docs/swagger-config
+
+healthtrail:
+    file-base-dir: D:\healthtrail
+    api-prefix: /test-api
+    demo-enabled: false
+

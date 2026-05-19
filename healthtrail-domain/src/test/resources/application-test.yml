@@ -1,0 +1,68 @@
+
+# 数据源配置
+spring:
+    datasource:
+        #  驱动
+        driver-class-name: org.h2.Driver
+        dynamic:
+            primary: master
+            strict: false
+            druid:
+                # 领域层测试同样补齐校验 SQL，保证 H2 数据源初始化日志更干净，也避免空配置歧义。
+                validationQuery: SELECT 1
+                testWhileIdle: true
+                testOnBorrow: false
+                testOnReturn: false
+            datasource:
+                master:
+                    # 领域层测试不能和其他模块共用固定 H2 库名。
+                    # 固定库名叠加 DB_CLOSE_DELAY=-1 时，前一个 Spring 上下文关闭后表结构仍会残留，
+                    # 后续测试重新执行 schema/data 脚本就会出现重复建表、重复插数问题。
+                    # 使用 random.uuid 生成上下文级唯一库名，可以让每次测试都落到一套干净的 H2 内存库。
+                    url: jdbc:h2:mem:healthtrail_domain_${random.uuid};DB_CLOSE_DELAY=-1;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE
+                    h2:
+                        # 开启console 访问 默认false
+                        console:
+                            enabled: true
+                            settings:
+                                #  开启h2 console 跟踪 方便调试  默认 false
+                                trace: true
+                                #  允许console 远程访问 默认false
+                                web-allow-others: true
+                            #  h2 访问路径上下文
+                            path: /h2-console
+
+    sql:
+        init:
+            # 显式声明 always，避免动态数据源代理影响 Spring 对初始化脚本的自动触发判断。
+            mode: always
+            platform: h2
+            # 领域测试与应用测试共用一套 H2 兼容初始化脚本，减少脚本分叉和结构漂移。
+            schema-locations:
+                - classpath:h2sql/healthtrail_test_schema.sql
+                - classpath:h2sql/health_test_schema.sql
+            data-locations:
+                - classpath:h2sql/healthtrail_test_data.sql
+                - classpath:h2sql/health_test_data.sql
+
+    # redis 配置
+    redis:
+        # 地址
+        host: localhost
+        # 端口，默认为6379
+        port: 36379
+        # 数据库索引
+        database: 0
+        # 连接超时时间
+        timeout: 10s
+        lettuce:
+            pool:
+                # 连接池中的最小空闲连接
+                min-idle: 0
+                # 连接池中的最大空闲连接
+                max-idle: 8
+                # 连接池的最大数据库连接数
+                max-active: 8
+                # #连接池最大阻塞等待时间（使用负值表示没有限制）
+                max-wait: -1ms
+

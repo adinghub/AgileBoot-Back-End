@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+  <!-- 日志存放路径 在xml文件夹中 -->
+  <springProperty name="log.path" source="logging.file.path"/>
+
+  <springProperty name="console.pattern" source="logging.pattern.console"/>
+
+  <!--
+    显式统一日志编码为 UTF-8。
+    背景：
+    1. 本项目的业务日志、i18n 文案、JSON 负载都包含大量中文；
+    2. 如果 encoder 不声明 charset，Logback 会退回到运行环境默认字符集；
+    3. 在 Windows / IDEA / Maven Boot 等不同启动方式下，默认字符集可能不一致，
+       就会出现“文件日志正常、控制台日志显示问号或乱码”的排查困难场景。
+    这里直接固定为 UTF-8，降低不同开发机之间的行为差异。
+  -->
+  <property name="log.charset" value="UTF-8"/>
+
+  <!-- 日志输出格式 -->
+  <property name="log.pattern" value="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{20} - [%method,%line] - %msg%n"/>
+
+  <!-- 控制台输出 -->
+  <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <!--
+        控制台日志也强制按 UTF-8 编码输出，避免中文消息在控制台链路上退回平台默认编码。
+        如果开发机终端本身不是 UTF-8（例如部分 Windows PowerShell 会话），
+        仍然建议配合 `chcp 65001` 或 IDE UTF-8 控制台一起使用。
+      -->
+      <charset>${log.charset}</charset>
+      <pattern>${console.pattern}</pattern>
+    </encoder>
+  </appender>
+
+  <!-- 系统日志输出 -->
+  <appender name="info_log" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${log.path}/sys-info.log</file>
+    <!-- 循环政策：基于时间创建日志文件 -->
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <!-- 日志文件名格式 -->
+      <fileNamePattern>${log.path}/sys-info.%d{yyyy-MM-dd}.log</fileNamePattern>
+      <!-- 日志最大的历史 60天 -->
+      <maxHistory>60</maxHistory>
+    </rollingPolicy>
+    <encoder>
+      <!--
+        文件日志显式指定 UTF-8，保证运维落盘日志、排错导出的日志文件、
+        以及后续 grep / 分析工具读取到的内容始终是统一编码。
+      -->
+      <charset>${log.charset}</charset>
+      <pattern>${log.pattern}</pattern>
+    </encoder>
+    <filter class="ch.qos.logback.classic.filter.LevelFilter">
+      <!-- 过滤的级别 -->
+      <level>INFO</level>
+      <!-- 匹配时的操作：接收（记录） -->
+      <onMatch>ACCEPT</onMatch>
+      <!-- 不匹配时的操作：拒绝（不记录） -->
+      <onMismatch>DENY</onMismatch>
+    </filter>
+  </appender>
+
+  <appender name="error_log" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${log.path}/sys-error.log</file>
+    <!-- 循环政策：基于时间创建日志文件 -->
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <!-- 日志文件名格式 -->
+      <fileNamePattern>${log.path}/sys-error.%d{yyyy-MM-dd}.log</fileNamePattern>
+      <!-- 日志最大的历史 60天 -->
+      <maxHistory>60</maxHistory>
+    </rollingPolicy>
+    <encoder>
+      <!-- 错误日志与主日志保持同一编码，避免不同文件之间出现编码不一致。 -->
+      <charset>${log.charset}</charset>
+      <pattern>${log.pattern}</pattern>
+    </encoder>
+    <filter class="ch.qos.logback.classic.filter.LevelFilter">
+      <!-- 过滤的级别 -->
+      <level>ERROR</level>
+      <!-- 匹配时的操作：接收（记录） -->
+      <onMatch>ACCEPT</onMatch>
+      <!-- 不匹配时的操作：拒绝（不记录） -->
+      <onMismatch>DENY</onMismatch>
+    </filter>
+  </appender>
+
+  <!-- debug日志输出  -->
+  <appender name="debug_log" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${log.path}/sys-debug.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <!-- 按天回滚 daily -->
+      <fileNamePattern>${log.path}/sys-debug.%d{yyyy-MM-dd}.log</fileNamePattern>
+      <!-- 日志最大的历史 60天 -->
+      <maxHistory>60</maxHistory>
+    </rollingPolicy>
+    <encoder>
+      <!-- debug 日志同样统一为 UTF-8，方便开发阶段直接对照中文上下文排查问题。 -->
+      <charset>${log.charset}</charset>
+      <pattern>${log.pattern}</pattern>
+    </encoder>
+  </appender>
+
+  <!-- 异步输出 -->
+  <appender name="async_info_log" class="ch.qos.logback.classic.AsyncAppender">
+    <!-- 不丢失日志.默认的,如果队列的80%已满,则会丢弃TRACT、DEBUG、INFO级别的日志 -->
+    <discardingThreshold>0</discardingThreshold>
+    <!-- 更改默认的队列的深度,该值会影响性能.默认值为256 -->
+    <queueSize>256</queueSize>
+    <!-- 添加附加的appender,最多只能添加一个 -->
+    <appender-ref ref="info_log"/>
+    <!-- %class%line中没有显示正确的值，而是两个问号? 解决办法：一般出现在AsyncAppender中，需要添加属性 -->
+    <includeCallerData>true</includeCallerData>
+  </appender>
+
+  <!-- 异步输出 -->
+  <appender name="async_error_log" class="ch.qos.logback.classic.AsyncAppender">
+    <!-- 不丢失日志.默认的,如果队列的80%已满,则会丢弃TRACT、DEBUG、INFO级别的日志 -->
+    <discardingThreshold>0</discardingThreshold>
+    <!-- 更改默认的队列的深度,该值会影响性能.默认值为256 -->
+    <queueSize>256</queueSize>
+    <!-- 添加附加的appender,最多只能添加一个 -->
+    <appender-ref ref="error_log"/>
+    <includeCallerData>true</includeCallerData>
+  </appender>
+
+  <!-- 异步输出 -->
+  <appender name="async_debug_log" class="ch.qos.logback.classic.AsyncAppender">
+    <!-- 不丢失日志.默认的,如果队列的80%已满,则会丢弃TRACT、DEBUG、INFO级别的日志 -->
+    <discardingThreshold>256</discardingThreshold>
+    <!-- 更改默认的队列的深度,该值会影响性能.默认值为256 -->
+    <queueSize>1024</queueSize>
+    <!-- 添加附加的appender,最多只能添加一个 -->
+    <appender-ref ref="debug_log"/>
+    <includeCallerData>true</includeCallerData>
+  </appender>
+
+
+  <root level="info">
+    <appender-ref ref="console"/>
+    <appender-ref ref="async_info_log"/>
+    <appender-ref ref="async_error_log"/>
+    <appender-ref ref="async_debug_log"/>
+  </root>
+
+
+
+</configuration>

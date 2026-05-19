@@ -1,0 +1,29 @@
+server:
+    port: 18031
+    servlet:
+        context-path: /
+    tomcat:
+        uri-encoding: UTF-8
+        accept-count: 1000
+        threads:
+            max: 800
+            min-spare: 100
+
+spring:
+    config:
+        import: optional:classpath:application-basic-pre.yml
+
+logging:
+    file:
+        path: /data/logs/healthtrail-admin-pre
+
+springdoc:
+    swagger-ui:
+        enabled: true
+        url: ${healthtrail.api-prefix}/v3/api-docs
+        config-url: ${healthtrail.api-prefix}/v3/api-docs/swagger-config
+
+healthtrail:
+    file-base-dir: /home/healthtrail
+    api-prefix: /pre-api
+    demo-enabled: false

@@ -1,10 +1,10 @@
 @echo off
 
-rem jar平级目录
-set AppName=agileboot-admin.jar
+rem jar平级目录。这里显式改成新的产物名，避免模块重命名后脚本仍去启动旧 jar。
+set AppName=healthtrail-admin.jar
 
 rem JVM参数
-set JVM_OPTS="-Dname=%AppName%  -Duser.timezone=Asia/Shanghai -Xms512m -Xmx1024m -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError -XX:+PrintGCDateStamps  -XX:+PrintGCDetails -XX:NewRatio=1 -XX:SurvivorRatio=30 -XX:+UseParallelGC -XX:+UseParallelOldGC"
+set JVM_OPTS="-Dname=%AppName% -Dspring.profiles.active=dev -Duser.timezone=Asia/Shanghai -Xms512m -Xmx1024m -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError -XX:+PrintGCDateStamps -XX:+PrintGCDetails -XX:NewRatio=1 -XX:SurvivorRatio=30 -XX:+UseParallelGC -XX:+UseParallelOldGC"
 
 
 ECHO.
