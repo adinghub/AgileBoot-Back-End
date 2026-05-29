@@ -374,8 +374,11 @@ public class AppMessageApplicationService {
             .eq(HealthAppMessageEntity::getBusinessScene, businessScene)
             .eq(HealthAppMessageEntity::getBusinessId, businessId)
             .orderByDesc(HealthAppMessageEntity::getMessageId)
-            .last("limit 1")
-            .one();
+            .page(new Page<>(1, 1))
+            .getRecords()
+            .stream()
+            .findFirst()
+            .orElse(null);
     }
 
     /**

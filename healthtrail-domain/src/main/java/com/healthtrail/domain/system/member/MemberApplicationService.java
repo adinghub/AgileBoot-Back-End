@@ -396,8 +396,8 @@ public class MemberApplicationService {
         return userMemberOrderService.lambdaQuery()
             .eq(UserMemberOrderEntity::getUserId, userId)
             .orderByDesc(UserMemberOrderEntity::getUserMemberOrderId)
-            .last("limit 10")
-            .list()
+            .page(new Page<>(1, 10))
+            .getRecords()
             .stream()
             .map(entity -> buildOrderDTO(entity, levelMap.get(entity.getMemberLevelId())))
             .collect(Collectors.toList());

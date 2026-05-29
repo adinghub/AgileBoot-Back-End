@@ -20,11 +20,11 @@ public class UnallocatedRoleQuery extends AbstractPageQuery<SysUserEntity> {
 
     public QueryWrapper<SysUserEntity> addQueryCondition() {
         QueryWrapper<SysUserEntity> queryWrapper = new QueryWrapper<>();
-        queryWrapper.like(StrUtil.isNotEmpty(username),"u.username", username)
-            .like(StrUtil.isNotEmpty(phoneNumber), "u.phone_number", phoneNumber)
-            .and(o-> o.ne("r.role_id", roleId)
-                .or().isNull("u.role_id")
-                .or().eq("u.role_id", 0));
+        queryWrapper.like(StrUtil.isNotEmpty(username), "username", username)
+            .like(StrUtil.isNotEmpty(phoneNumber), "phone_number", phoneNumber)
+            .and(roleId != null, o -> o.ne("role_id", roleId)
+                .or().isNull("role_id")
+                .or().eq("role_id", 0));
 
         return queryWrapper;
     }

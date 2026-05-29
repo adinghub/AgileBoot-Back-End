@@ -5,6 +5,7 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.healthtrail.common.enums.common.StatusEnum;
 import com.healthtrail.common.exception.ApiException;
 import com.healthtrail.common.exception.error.ErrorCode;
@@ -578,8 +579,11 @@ public class HealthInsightApplicationService {
             .eq(HealthOperationTaskEntity::getTargetBizType, HEALTH_PROBLEM_REVIEW_TASK_TYPE)
             .eq(HealthOperationTaskEntity::getTargetBizId, problemId)
             .eq(HealthOperationTaskEntity::getStatus, StatusEnum.ENABLE.getValue())
-            .last("LIMIT 1")
-            .one();
+            .page(new Page<>(1, 1))
+            .getRecords()
+            .stream()
+            .findFirst()
+            .orElse(null);
         if (task == null) {
             task = new HealthOperationTaskEntity();
             task.setOwnerUserId(problem.getOwnerUserId());
@@ -647,8 +651,8 @@ public class HealthInsightApplicationService {
             .eq(HealthProblemStatusLogEntity::getProblemId, problemId)
             .orderByDesc(HealthProblemStatusLogEntity::getActionTime)
             .orderByDesc(HealthProblemStatusLogEntity::getLogId)
-            .last("LIMIT " + PROBLEM_STATUS_LOG_LIMIT)
-            .list();
+            .page(new Page<>(1, PROBLEM_STATUS_LOG_LIMIT))
+            .getRecords();
         Map<Long, HealthAppUserEntity> operatorMap = loadAppUserMap(logs.stream()
             .map(HealthProblemStatusLogEntity::getOperatorUserId)
             .filter(Objects::nonNull)
@@ -755,8 +759,11 @@ public class HealthInsightApplicationService {
         HealthProblemChronicProfileLinkEntity link = healthProblemChronicProfileLinkService.lambdaQuery()
             .eq(HealthProblemChronicProfileLinkEntity::getProblemId, problemId)
             .eq(HealthProblemChronicProfileLinkEntity::getProfileId, profile.getProfileId())
-            .last("LIMIT 1")
-            .one();
+            .page(new Page<>(1, 1))
+            .getRecords()
+            .stream()
+            .findFirst()
+            .orElse(null);
         if (link == null) {
             link = new HealthProblemChronicProfileLinkEntity();
             link.setOwnerUserId(problem.getOwnerUserId());
@@ -790,8 +797,11 @@ public class HealthInsightApplicationService {
         HealthProblemChronicProfileLinkEntity link = healthProblemChronicProfileLinkService.lambdaQuery()
             .eq(HealthProblemChronicProfileLinkEntity::getProblemId, problemId)
             .eq(HealthProblemChronicProfileLinkEntity::getProfileId, profileId)
-            .last("LIMIT 1")
-            .one();
+            .page(new Page<>(1, 1))
+            .getRecords()
+            .stream()
+            .findFirst()
+            .orElse(null);
         if (link != null) {
             healthProblemChronicProfileLinkService.removeById(link.getLinkId());
         }
@@ -1276,7 +1286,7 @@ public class HealthInsightApplicationService {
         } else {
             query.eq(HealthOperationTaskEntity::getTargetBizId, targetBizId);
         }
-        return query.last("LIMIT 1").one();
+        return query.page(new Page<>(1, 1)).getRecords().stream().findFirst().orElse(null);
     }
 
     private String resolveReviewSuggestionTaskType(String targetType) {
@@ -2676,8 +2686,8 @@ public class HealthInsightApplicationService {
             .in(HealthReportEntity::getMemberId, memberIds)
             .orderByDesc(HealthReportEntity::getReportDate)
             .orderByDesc(HealthReportEntity::getReportId)
-            .last("LIMIT " + RECENT_REPORT_LIMIT)
-            .list();
+            .page(new Page<>(1, RECENT_REPORT_LIMIT))
+            .getRecords();
     }
 
     private List<HealthReportItemEntity> listReportItems(Set<Long> reportIds) {
@@ -2709,8 +2719,8 @@ public class HealthInsightApplicationService {
             .in(HealthMedicationReminderEntity::getMemberId, memberIds)
             .eq(HealthMedicationReminderEntity::getReminderStatus, MedicationReminderStatusEnum.PENDING.getValue())
             .orderByAsc(HealthMedicationReminderEntity::getScheduledTime)
-            .last("LIMIT 50")
-            .list();
+            .page(new Page<>(1, 50))
+            .getRecords();
     }
 
     private List<HealthChronicDiaryEntryEntity> listLatestDiaryEntries(Set<Long> memberIds, int limit) {
@@ -2722,8 +2732,8 @@ public class HealthInsightApplicationService {
             .eq(HealthChronicDiaryEntryEntity::getStatus, StatusEnum.ENABLE.getValue())
             .orderByDesc(HealthChronicDiaryEntryEntity::getRecordTime)
             .orderByDesc(HealthChronicDiaryEntryEntity::getDiaryEntryId)
-            .last("LIMIT " + Math.max(1, limit))
-            .list();
+            .page(new Page<>(1, Math.max(1, limit)))
+            .getRecords();
     }
 
     private List<HealthChronicDiaryEntryEntity> listRecentDailyIndicatorEntries(Set<Long> memberIds, int limit) {
@@ -2736,8 +2746,8 @@ public class HealthInsightApplicationService {
             .in(HealthChronicDiaryEntryEntity::getEntryType, buildDailyIndicatorEntryTypes())
             .orderByDesc(HealthChronicDiaryEntryEntity::getRecordTime)
             .orderByDesc(HealthChronicDiaryEntryEntity::getDiaryEntryId)
-            .last("LIMIT " + Math.max(1, limit))
-            .list();
+            .page(new Page<>(1, Math.max(1, limit)))
+            .getRecords();
     }
 
     private List<String> buildDailyIndicatorEntryTypes() {
@@ -2782,8 +2792,8 @@ public class HealthInsightApplicationService {
                 .ge(HealthOperationTaskEntity::getEndTime, now))
             .orderByAsc(HealthOperationTaskEntity::getStartTime)
             .orderByDesc(HealthOperationTaskEntity::getPriorityWeight)
-            .last("LIMIT 20")
-            .list();
+            .page(new Page<>(1, 20))
+            .getRecords();
     }
     private List<HealthProblemStatusLogEntity> listRecentProblemStatusLogs(Set<Long> memberIds, int limit) {
         if (memberIds.isEmpty()) {
@@ -2793,8 +2803,8 @@ public class HealthInsightApplicationService {
             .in(HealthProblemStatusLogEntity::getMemberId, memberIds)
             .orderByDesc(HealthProblemStatusLogEntity::getActionTime)
             .orderByDesc(HealthProblemStatusLogEntity::getLogId)
-            .last("LIMIT " + Math.max(1, limit))
-            .list();
+            .page(new Page<>(1, Math.max(1, limit)))
+            .getRecords();
     }
     private HealthInsightWorkbenchDTO.ReviewLoopSummaryDTO buildReviewLoop(
         List<HealthChronicDiseaseProfileEntity> profiles, List<HealthOperationTaskEntity> reviewTasks) {

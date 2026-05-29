@@ -33,7 +33,6 @@ public class DeptQuery extends AbstractQuery<SysDeptEntity> {
 //            .and(deptId != null && isExcludeCurrentDept, o ->
 //                o.ne("dept_id", deptId)
 //                    .or()
-//                    .apply("FIND_IN_SET (dept_id , ancestors)")
 //            );
     }
 }

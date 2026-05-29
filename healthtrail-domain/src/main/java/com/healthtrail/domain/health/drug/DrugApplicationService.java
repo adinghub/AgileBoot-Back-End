@@ -1706,8 +1706,11 @@ public class DrugApplicationService {
             .eq(HealthDrugStockBatchEntity::getOwnerUserId, drugModel.getOwnerUserId())
             .eq(HealthDrugStockBatchEntity::getDrugId, drugModel.getDrugId())
             .eq(HealthDrugStockBatchEntity::getDefaultBatch, toSmallintFlag(true))
-            .last("limit 1")
-            .one();
+            .page(new Page<>(1, 1))
+            .getRecords()
+            .stream()
+            .findFirst()
+            .orElse(null);
         if (defaultBatchEntity != null) {
             return new RestoreStockBatchBucket(defaultBatchEntity.getBatchNo(), defaultBatchEntity.getExpireDate(), true);
         }
@@ -1719,8 +1722,11 @@ public class DrugApplicationService {
             .orderByAsc(HealthDrugStockBatchEntity::getExpireDate)
             .orderByAsc(HealthDrugStockBatchEntity::getBatchNo)
             .orderByAsc(HealthDrugStockBatchEntity::getBatchId)
-            .last("limit 1")
-            .one();
+            .page(new Page<>(1, 1))
+            .getRecords()
+            .stream()
+            .findFirst()
+            .orElse(null);
         if (earliestBatchEntity != null) {
             return new RestoreStockBatchBucket(earliestBatchEntity.getBatchNo(), earliestBatchEntity.getExpireDate(),
                 Boolean.TRUE.equals(earliestBatchEntity.getDefaultBatch()));
@@ -1749,8 +1755,11 @@ public class DrugApplicationService {
                 .eq(HealthDrugStockBatchEntity::getExpireDate, expireDate)
                 .eq(StrUtil.isNotBlank(batchNo), HealthDrugStockBatchEntity::getBatchNo, batchNo)
                 .isNull(StrUtil.isBlank(batchNo), HealthDrugStockBatchEntity::getBatchNo)
-                .last("limit 1")
-                .one();
+                .page(new Page<>(1, 1))
+                .getRecords()
+                .stream()
+                .findFirst()
+                .orElse(null);
         } else {
             return drugStockBatchService.lambdaQuery()
                 .eq(HealthDrugStockBatchEntity::getOwnerUserId, ownerUserId)
@@ -1759,8 +1768,11 @@ public class DrugApplicationService {
                 .isNull(HealthDrugStockBatchEntity::getExpireDate)
                 .eq(StrUtil.isNotBlank(batchNo), HealthDrugStockBatchEntity::getBatchNo, batchNo)
                 .isNull(StrUtil.isBlank(batchNo), HealthDrugStockBatchEntity::getBatchNo)
-                .last("limit 1")
-                .one();
+                .page(new Page<>(1, 1))
+                .getRecords()
+                .stream()
+                .findFirst()
+                .orElse(null);
         }
     }
 

@@ -2,6 +2,7 @@ package com.healthtrail.domain.health.dashboard;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.healthtrail.common.core.page.PageDTO;
 import com.healthtrail.common.enums.common.StatusEnum;
 import com.healthtrail.common.enums.health.HealthAppMessageReadStatusEnum;
@@ -274,9 +275,8 @@ public class HealthDashboardApplicationService {
         QueryWrapper<HealthReportEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("owner_user_id", ownerUserId)
             .orderByDesc("report_date")
-            .orderByDesc("report_id")
-            .last("limit " + Math.max(limit, 1));
-        return reportService.list(queryWrapper);
+            .orderByDesc("report_id");
+        return reportService.page(new Page<>(1, Math.max(limit, 1)), queryWrapper).getRecords();
     }
 
     /**

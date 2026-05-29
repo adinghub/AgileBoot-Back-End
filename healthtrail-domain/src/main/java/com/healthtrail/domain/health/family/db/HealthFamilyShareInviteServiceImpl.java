@@ -2,6 +2,7 @@ package com.healthtrail.domain.health.family.db;
 
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
@@ -19,8 +20,7 @@ public class HealthFamilyShareInviteServiceImpl
             return null;
         }
         QueryWrapper<HealthFamilyShareInviteEntity> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("invite_code", inviteCode.trim().toUpperCase())
-            .last("limit 1");
-        return this.getOne(queryWrapper);
+        queryWrapper.eq("invite_code", inviteCode.trim().toUpperCase());
+        return this.page(new Page<>(1, 1), queryWrapper).getRecords().stream().findFirst().orElse(null);
     }
 }

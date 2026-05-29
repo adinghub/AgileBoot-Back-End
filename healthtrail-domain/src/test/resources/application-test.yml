@@ -38,6 +38,7 @@ spring:
             mode: always
             platform: h2
             # 领域测试与应用测试共用一套 H2 兼容初始化脚本，减少脚本分叉和结构漂移。
+            encoding: UTF-8
             schema-locations:
                 - classpath:h2sql/healthtrail_test_schema.sql
                 - classpath:h2sql/health_test_schema.sql

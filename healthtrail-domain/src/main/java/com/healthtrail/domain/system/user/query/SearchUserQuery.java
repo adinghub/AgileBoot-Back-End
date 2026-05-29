@@ -25,20 +25,12 @@ public class SearchUserQuery<T> extends AbstractPageQuery<T> {
         QueryWrapper<T> queryWrapper = new QueryWrapper<>();
 
         queryWrapper.like(StrUtil.isNotEmpty(username), "username", username)
-            .like(StrUtil.isNotEmpty(phoneNumber), "u.phone_number", phoneNumber)
-            .eq(userId != null, "u.user_id", userId)
-            .eq(status != null, "u.status", status)
-            .eq("u.deleted", 0)
-            .and(deptId != null, o ->
-                o.eq("u.dept_id", deptId)
-                    .or()
-                    .apply(
-                        "u.dept_id IN (SELECT t.dept_id FROM sys_dept t "
-                            + "WHERE POSITION(',' || CAST({0} AS VARCHAR) || ',' IN ',' || t.ancestors || ',') > 0)",
-                        deptId));
+            .like(StrUtil.isNotEmpty(phoneNumber), "phone_number", phoneNumber)
+            .eq(userId != null, "user_id", userId)
+            .eq(status != null, "status", status);
 
         // 设置排序字段
-        this.timeRangeColumn = "u.create_time";
+        this.timeRangeColumn = "create_time";
 
         return queryWrapper;
     }

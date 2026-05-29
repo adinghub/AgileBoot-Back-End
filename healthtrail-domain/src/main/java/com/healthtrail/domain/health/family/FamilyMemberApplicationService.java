@@ -3,6 +3,7 @@ package com.healthtrail.domain.health.family;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.healthtrail.common.enums.health.FamilyMemberAccessRoleEnum;
 import com.healthtrail.common.enums.health.FamilyMemberShareStatusEnum;
 import com.healthtrail.common.enums.health.FamilyShareInviteStatusEnum;
@@ -276,8 +277,11 @@ public class FamilyMemberApplicationService {
         HealthFamilyMemberShareEntity shareEntity = familyMemberShareService.lambdaQuery()
             .eq(HealthFamilyMemberShareEntity::getMemberId, inviteEntity.getMemberId())
             .eq(HealthFamilyMemberShareEntity::getCollaboratorUserId, currentUserId)
-            .last("limit 1")
-            .one();
+            .page(new Page<>(1, 1))
+            .getRecords()
+            .stream()
+            .findFirst()
+            .orElse(null);
         if (shareEntity == null) {
             shareEntity = new HealthFamilyMemberShareEntity();
             shareEntity.setMemberId(inviteEntity.getMemberId());

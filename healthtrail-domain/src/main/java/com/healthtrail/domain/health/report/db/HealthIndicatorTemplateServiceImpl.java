@@ -1,9 +1,10 @@
 package com.healthtrail.domain.health.report.db;
 
 import cn.hutool.core.util.StrUtil;
-import com.healthtrail.common.enums.common.StatusEnum;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.healthtrail.common.enums.common.StatusEnum;
 import org.springframework.stereotype.Service;
 
 /**
@@ -23,8 +24,7 @@ public class HealthIndicatorTemplateServiceImpl
                 .or()
                 .eq("item_name", itemName))
             .orderByAsc("sort")
-            .orderByDesc("template_id")
-            .last("limit 1");
-        return this.getOne(queryWrapper);
+            .orderByDesc("template_id");
+        return this.page(new Page<>(1, 1), queryWrapper).getRecords().stream().findFirst().orElse(null);
     }
 }

@@ -2,9 +2,16 @@ package com.healthtrail.domain.system.menu.db;
 
 import com.healthtrail.domain.system.role.db.SysRoleMenuEntity;
 import com.healthtrail.domain.system.role.db.SysRoleMenuMapper;
+import com.healthtrail.domain.system.user.db.SysUserEntity;
+import com.healthtrail.domain.system.user.db.SysUserMapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +28,7 @@ import org.springframework.stereotype.Service;
 public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuEntity> implements SysMenuService {
 
     private final SysRoleMenuMapper roleMenuMapper;
+    private final SysUserMapper userMapper;
 
 
     /**
@@ -31,7 +39,16 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuEntity
      */
     @Override
     public List<Long> getMenuIdsByRoleId(Long roleId) {
-        return this.baseMapper.selectMenuIdsByRoleId(roleId);
+        Set<Long> roleMenuIds = getRoleMenuIds(roleId);
+        if (roleMenuIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        QueryWrapper<SysMenuEntity> menuQuery = new QueryWrapper<>();
+        menuQuery.select("menu_id").in("menu_id", roleMenuIds);
+        return this.list(menuQuery).stream()
+            .map(SysMenuEntity::getMenuId)
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -68,8 +85,30 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuEntity
 
     @Override
     public List<SysMenuEntity> getMenuListByUserId(Long userId) {
-        return baseMapper.selectMenuListByUserId(userId);
+        SysUserEntity user = userMapper.selectById(userId);
+        if (user == null || user.getRoleId() == null) {
+            return Collections.emptyList();
+        }
+
+        Set<Long> roleMenuIds = getRoleMenuIds(user.getRoleId());
+        if (roleMenuIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        QueryWrapper<SysMenuEntity> menuQuery = new QueryWrapper<>();
+        menuQuery.in("menu_id", roleMenuIds)
+            .eq("status", 1)
+            .orderByAsc("parent_id");
+        return this.list(menuQuery);
     }
 
+    private Set<Long> getRoleMenuIds(Long roleId) {
+        QueryWrapper<SysRoleMenuEntity> roleMenuQuery = new QueryWrapper<>();
+        roleMenuQuery.eq("role_id", roleId);
+        return roleMenuMapper.selectList(roleMenuQuery).stream()
+            .map(SysRoleMenuEntity::getMenuId)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
 
 }

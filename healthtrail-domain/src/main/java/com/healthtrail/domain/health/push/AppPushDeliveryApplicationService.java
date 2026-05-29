@@ -206,8 +206,8 @@ public class AppPushDeliveryApplicationService {
             .eq(HealthAppPushDeliveryLogEntity::getDeviceId, deviceId)
             .orderByDesc(HealthAppPushDeliveryLogEntity::getSendTime)
             .orderByDesc(HealthAppPushDeliveryLogEntity::getDeliveryId)
-            .last("limit " + safeLimit)
-            .list();
+            .page(new Page<>(1, safeLimit))
+            .getRecords();
         Map<Long, HealthAppMessageEntity> messageMap = loadMessageMap(entities);
         Map<Long, HealthAppUserEntity> userMap = loadUserMapByOwnerUserIds(
             entities.stream().map(HealthAppPushDeliveryLogEntity::getOwnerUserId).collect(Collectors.toSet()));

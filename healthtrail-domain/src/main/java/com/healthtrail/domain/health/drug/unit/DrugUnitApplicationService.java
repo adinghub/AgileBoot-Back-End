@@ -86,8 +86,8 @@ public class DrugUnitApplicationService {
                 .like(DrugUnitEntity::getUnitAlias, StrUtil.trim(keyword)))
             .orderByAsc(DrugUnitEntity::getSort)
             .orderByAsc(DrugUnitEntity::getUnitId)
-            .last("limit 100")
-            .list();
+            .page(new Page<>(1, 100))
+            .getRecords();
         List<DrugUnitDTO> unitDTOList = unitEntities.stream().map(DrugUnitDTO::new).collect(Collectors.toList());
         fillIconUrl(unitDTOList);
         return unitDTOList;

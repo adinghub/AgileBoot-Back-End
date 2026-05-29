@@ -4,6 +4,7 @@ import com.healthtrail.domain.system.user.db.SysUserEntity;
 import com.healthtrail.domain.system.user.db.SysUserMapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -36,21 +37,15 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
     @Override
     public boolean hasChildrenDept(Long deptId, Boolean enabled) {
         QueryWrapper<SysDeptEntity> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq(enabled != null, "status", 1)
-            .and(o -> o.eq("parent_id", deptId).or()
-                .apply("POSITION(',' || CAST({0} AS VARCHAR) || ',' IN ',' || ancestors || ',') > 0", deptId)
-            );
-        return this.baseMapper.exists(queryWrapper);
+        queryWrapper.eq(Boolean.TRUE.equals(enabled), "status", 1);
+        return this.baseMapper.selectList(queryWrapper).stream()
+            .anyMatch(dept -> Objects.equals(dept.getParentId(), deptId) || isChildDept(dept, deptId));
     }
 
 
     @Override
     public boolean isChildOfTheDept(Long parentId, Long childId) {
-        QueryWrapper<SysDeptEntity> queryWrapper = new QueryWrapper<>();
-        queryWrapper
-            .eq("dept_id", childId)
-            .apply("POSITION(',' || CAST({0} AS VARCHAR) || ',' IN ',' || ancestors || ',') > 0", parentId);
-        return this.baseMapper.exists(queryWrapper);
+        return isChildDept(this.getById(childId), parentId);
     }
 
 
@@ -59,6 +54,19 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
         QueryWrapper<SysUserEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("dept_id", deptId);
         return userMapper.exists(queryWrapper);
+    }
+
+    private boolean isChildDept(SysDeptEntity dept, Long parentId) {
+        if (dept == null || dept.getAncestors() == null || parentId == null) {
+            return false;
+        }
+        String parentIdText = String.valueOf(parentId);
+        for (String ancestor : dept.getAncestors().split(",")) {
+            if (parentIdText.equals(ancestor.trim())) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

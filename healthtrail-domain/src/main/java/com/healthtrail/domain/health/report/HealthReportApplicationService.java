@@ -134,15 +134,15 @@ public class HealthReportApplicationService {
      * 各自维护一套不一致的话术。
      */
     private static final String REPORT_PARSE_QUEUE_ANALYSIS_SUMMARY =
-        “报告解析任务已提交队列，系统正在后台处理中，请稍后查看。”;
+        "报告解析任务已提交队列，系统正在后台处理中，请稍后查看。";
 
     private static final String REPORT_PARSE_QUEUE_RESULT_INTERPRETATION =
-        “当前报告正在后台解析中，结构化结果与解读将在任务完成后自动更新。”;
+        "当前报告正在后台解析中，结构化结果与解读将在任务完成后自动更新。";
 
     /**
      * 趋势比较时用于从结果文本中提取数值的正则。
      */
-    private static final Pattern TREND_NUMBER_PATTERN = Pattern.compile(“[-+]?\\d+(\\.\\d+)?”);
+    private static final Pattern TREND_NUMBER_PATTERN = Pattern.compile("[-+]?\\d+(\\.\\d+)?");
 
     /** 报告主表数据库服务 */
     private final HealthReportService reportService;

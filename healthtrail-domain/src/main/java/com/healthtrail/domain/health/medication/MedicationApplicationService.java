@@ -460,10 +460,10 @@ public class MedicationApplicationService {
             .and(wrapper -> wrapper.eq("notify_status", MedicationReminderNotifyStatusEnum.PENDING.getValue())
                 .or()
                 .eq("notify_status", MedicationReminderNotifyStatusEnum.FAILED.getValue()))
-            .orderByAsc("scheduled_time")
-            .last("limit " + safeBatchSize);
+            .orderByAsc("scheduled_time");
 
-        List<HealthMedicationReminderEntity> dueReminders = medicationReminderService.list(queryWrapper);
+        List<HealthMedicationReminderEntity> dueReminders =
+            medicationReminderService.page(new Page<>(1, safeBatchSize), queryWrapper).getRecords();
         int successCount = 0;
         for (HealthMedicationReminderEntity reminderEntity : dueReminders) {
             if (dispatchSingleReminder(reminderEntity, now)) {

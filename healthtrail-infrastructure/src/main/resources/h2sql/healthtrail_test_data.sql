@@ -168,6 +168,8 @@ INSERT INTO sys_role_menu (role_id, menu_id) VALUES (2, 58);
 INSERT INTO sys_role_menu (role_id, menu_id) VALUES (2, 59);
 INSERT INTO sys_role_menu (role_id, menu_id) VALUES (2, 60);
 INSERT INTO sys_role_menu (role_id, menu_id) VALUES (2, 61);
+INSERT INTO sys_role_menu (role_id, menu_id) VALUES (2, 62);
+INSERT INTO sys_role_menu (role_id, menu_id) VALUES (2, 63);
 INSERT INTO sys_role_menu (role_id, menu_id) VALUES (3, 1);
 INSERT INTO sys_role_menu (role_id, menu_id) VALUES (111, 1);
 
@@ -266,7 +268,7 @@ INSERT INTO sys_role_menu (role_id, menu_id) VALUES
 (2, 300), (2, 301), (2, 302), (2, 303), (2, 304), (2, 305), (2, 306), (2, 307), (2, 308), (2, 309),
 (2, 310), (2, 311), (2, 312), (2, 313), (2, 314), (2, 315), (2, 316), (2, 317), (2, 318), (2, 319),
 (2, 320), (2, 321), (2, 322), (2, 323), (2, 324), (2, 325), (2, 326), (2, 327), (2, 328), (2, 329),
-(2, 330), (2, 331), (2, 332), (2, 333), (2, 334);
+(2, 330), (2, 331), (2, 332), (2, 333);
 
 -- 回填自增列的起始值，确保测试中继续插入数据时不会和种子数据主键冲突。
 ALTER TABLE sys_config ALTER COLUMN config_id RESTART WITH 6;

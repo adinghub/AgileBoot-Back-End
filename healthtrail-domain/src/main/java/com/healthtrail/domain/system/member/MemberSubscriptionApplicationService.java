@@ -2,6 +2,7 @@ package com.healthtrail.domain.system.member;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.IdUtil;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.healthtrail.common.enums.common.StatusEnum;
 import com.healthtrail.common.enums.common.YesOrNoEnum;
 import com.healthtrail.common.exception.ApiException;
@@ -120,8 +121,8 @@ public class MemberSubscriptionApplicationService {
         return userMemberOrderService.lambdaQuery()
             .eq(UserMemberOrderEntity::getUserId, userId)
             .orderByDesc(UserMemberOrderEntity::getUserMemberOrderId)
-            .last("limit 20")
-            .list()
+            .page(new Page<>(1, 20))
+            .getRecords()
             .stream()
             .map(entity -> {
                 MemberLevelEntity memberLevelEntity = levelMap.get(entity.getMemberLevelId());

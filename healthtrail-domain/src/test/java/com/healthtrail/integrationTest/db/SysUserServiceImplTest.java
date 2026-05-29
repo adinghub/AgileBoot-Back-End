@@ -44,8 +44,8 @@ class SysUserServiceImplTest {
     @Test
     @Rollback
     void testIsPhoneDuplicated() {
-        boolean addWithSame = userService.isPhoneDuplicated("15888888889", null);
-        boolean updateWithSame = userService.isPhoneDuplicated("15888888889", 1L);
+        boolean addWithSame = userService.isPhoneDuplicated("15888888883", null);
+        boolean updateWithSame = userService.isPhoneDuplicated("15888888883", 1L);
         boolean addWithoutSame = userService.isPhoneDuplicated("15888888899", null);
 
         Assertions.assertTrue(addWithSame);

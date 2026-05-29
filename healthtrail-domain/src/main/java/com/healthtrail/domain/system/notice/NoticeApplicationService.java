@@ -28,7 +28,7 @@ public class NoticeApplicationService {
     private final NoticeModelFactory noticeModelFactory;
 
     public PageDTO<NoticeDTO> getNoticeList(NoticeQuery query) {
-        Page<SysNoticeEntity> page = noticeService.getNoticeList(query.toPage(), query.toQueryWrapper());
+        Page<SysNoticeEntity> page = noticeService.getNoticeList(query);
         List<NoticeDTO> records = page.getRecords().stream().map(NoticeDTO::new).collect(Collectors.toList());
         return new PageDTO<>(records, page.getTotal());
     }

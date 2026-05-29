@@ -467,8 +467,11 @@ public class ChronicDiseaseApplicationService {
         HealthChronicIndicatorTargetEntity entity = indicatorTargetService.lambdaQuery()
             .eq(HealthChronicIndicatorTargetEntity::getProfileId, profileId)
             .eq(HealthChronicIndicatorTargetEntity::getIndicatorCode, indicatorCode)
-            .last("LIMIT 1")
-            .one();
+            .page(new Page<>(1, 1))
+            .getRecords()
+            .stream()
+            .findFirst()
+            .orElse(null);
         if (entity == null) {
             entity = new HealthChronicIndicatorTargetEntity();
             entity.setOwnerUserId(profile.getOwnerUserId());
@@ -555,8 +558,11 @@ public class ChronicDiseaseApplicationService {
                 .or()
                 .ge(HealthOperationTaskEntity::getEndTime, now))
             .orderByDesc(HealthOperationTaskEntity::getOperationTaskId)
-            .last("LIMIT 1")
-            .one();
+            .page(new Page<>(1, 1))
+            .getRecords()
+            .stream()
+            .findFirst()
+            .orElse(null);
     }
 
     /**
@@ -888,8 +894,8 @@ public class ChronicDiseaseApplicationService {
             .eq(HealthReportEntity::getMemberId, memberId)
             .orderByDesc(HealthReportEntity::getReportDate)
             .orderByDesc(HealthReportEntity::getReportId)
-            .last("LIMIT " + DASHBOARD_REPORT_LIMIT)
-            .list();
+            .page(new Page<>(1, DASHBOARD_REPORT_LIMIT))
+            .getRecords();
     }
 
     private Date resolveLatestReportDate(List<HealthReportEntity> reports) {
